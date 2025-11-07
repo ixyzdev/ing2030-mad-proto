@@ -1,0 +1,50 @@
+name: Build Docker Image
+
+on:
+  push:
+    branches:
+      - "**" # Todas las ramas
+  pull_request:
+    branches:
+      - "**" # (opcional) también en todos los PRs
+
+jobs:
+  build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false # cámbialo a true si deseas subir la imagen
+          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          platforms: linux/amd64
+
+      # - name: Verify image
+      #   run: docker image inspect ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+
+      - name: Export built image
+        if: always()
+        run: docker save ghcr.io/${{ github.repository }}:${{ github.ref_name }} | gzip > image.tar.gz
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-${{ github.ref_name }}
+          path: image.tar.gz

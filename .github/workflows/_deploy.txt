@@ -1,0 +1,20 @@
+# name: Deploy to Dokploy
+
+# on:
+#     workflow_run:
+#         workflows: ["Build Docker Image"] # nombre exacto del workflow del build
+#         types:
+#             - completed
+
+# jobs:
+#     deploy:
+#         name: Deploy to Dokploy
+#         runs-on: ubuntu-latest
+#         if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+#         steps:
+#             - name: Trigger redeploy on Dokploy
+#               run: |
+#                   curl -X POST https://dokploy.example.com/api/v1/projects/<PROJECT_ID>/redeploy \
+#                     -H "Authorization: Bearer ${{ secrets.DOKPLOY_TOKEN }}" \
+#                     -H "Content-Type: application/json"
